@@ -1,6 +1,6 @@
-{% load static %}
+{% load static shop_extras %}
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="{{ current_language|default:'uz' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,43 +10,64 @@
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&family=Alex+Brush&family=Caveat:wght@600;700&family=Playfair+Display:ital,wght@1,500;1,600;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
-<body>
+<body data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false">
     <header class="site-header">
         <div class="container header-inner">
             <a href="{% url 'shop:home' %}" class="logo">only<span>girls</span></a>
 
             <button class="katalog-btn" onclick="toggleSidebar()">
-                <span class="katalog-icon">☰</span> Katalog
+                <span class="katalog-icon">☰</span> {% t "katalog" %}
             </button>
 
             <form action="{% url 'shop:search' %}" method="get" class="search-form">
-                <input type="text" name="q" placeholder="Qidirish" value="{{ query|default:'' }}">
-                <button type="submit" class="search-btn" aria-label="Qidirish">
+                <input type="text" name="q" placeholder="{% t 'qidirish' %}" value="{{ query|default:'' }}">
+                <button type="submit" class="search-btn" aria-label="{% t 'qidirish' %}">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </button>
             </form>
+
+            <div class="lang-switcher">
+                <form method="post" action="{% url 'shop:set_language' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <input type="hidden" name="language" value="uz">
+                    <button type="submit" class="lang-btn {% if current_language == 'uz' %}active{% endif %}">UZ</button>
+                </form>
+                <form method="post" action="{% url 'shop:set_language' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <input type="hidden" name="language" value="ru">
+                    <button type="submit" class="lang-btn {% if current_language == 'ru' %}active{% endif %}">RU</button>
+                </form>
+            </div>
 
             <div class="header-icons">
                 {% if user.is_authenticated %}
                 <a href="{% url 'accounts:profile' %}" class="header-icon-link">
                     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"/></svg>
-                    <span>Profil</span>
+                    <span>{% t "profil" %}</span>
+                </a>
+
+                <a href="{% url 'accounts:notifications' %}" class="header-icon-link">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <span>{% t "bildirishnoma" %}</span>
+                    {% if unread_notifications_count %}<span class="header-icon-badge">{{ unread_notifications_count }}</span>{% endif %}
                 </a>
                 {% else %}
                 <a href="{% url 'accounts:login' %}" class="header-icon-link">
                     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"/></svg>
-                    <span>Kirish</span>
+                    <span>{% t "kirish" %}</span>
                 </a>
                 {% endif %}
 
                 <a href="{% url 'shop:liked_products' %}" class="header-icon-link">
                     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.2-4.5-9.8-9.1C.6 8.4 2 4.5 6 4.5c2.1 0 3.7 1.2 6 3.5 2.3-2.3 3.9-3.5 6-3.5 4 0 5.4 3.9 3.8 7.4C19.2 16.5 12 21 12 21z"/></svg>
-                    <span>Sevimlilar</span>
+                    <span>{% t "sevimlilar" %}</span>
                 </a>
 
                 <a href="{% url 'orders:cart_detail' %}" class="header-icon-link">
                     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.8h8.6a2 2 0 0 0 2-1.6L21 8H6"/></svg>
-                    <span>Savatcha</span>
+                    <span>{% t "savatcha" %}</span>
                     {% if cart|length %}<span class="header-icon-badge">{{ cart|length }}</span>{% endif %}
                 </a>
             </div>
@@ -60,9 +81,9 @@
         <div class="sidebar-brand">only<span>girls</span></div>
 
         <nav class="sidebar-nav">
-            <a href="{% url 'shop:product_list' %}">Barcha mahsulotlar</a>
+            <a href="{% url 'shop:product_list' %}">{% t "barcha_mahsulotlar" %}</a>
             <button type="button" class="sidebar-toggle" onclick="toggleCategories()">
-                Kategoriyalar <span class="toggle-arrow" id="categoriesArrow">▾</span>
+                {% t "kategoriyalar" %} <span class="toggle-arrow" id="categoriesArrow">▾</span>
             </button>
             <div class="sidebar-submenu" id="categoriesSubmenu">
                 {% for cat in categories %}
@@ -71,9 +92,15 @@
             </div>
 
             {% if user.is_authenticated %}
-                <a href="{% url 'accounts:profile' %}">👤 Mening profilim</a>
+                <a href="{% url 'accounts:profile' %}">{% t "mening_profilim" %}</a>
             {% else %}
-                <a href="{% url 'accounts:login' %}">👤 Kirish</a>
+                <a href="{% url 'accounts:login' %}">👤 {% t "kirish" %}</a>
+            {% endif %}
+
+            {% if user.is_staff %}
+                <p class="sidebar-heading">{% t "boshqaruv" %}</p>
+                <a href="{% url 'shop:dashboard_products' %}">{% t "mahsulotlar_paneli" %}</a>
+                <a href="{% url 'orders:dashboard_orders' %}">{% t "buyurtmalar_paneli" %}</a>
             {% endif %}
         </nav>
     </aside>
@@ -87,14 +114,14 @@
             </div>
         {% endif %}
         {% if request.path != '/' %}
-            <a href="{% url 'shop:home' %}" class="back-home-link">← Bosh sahifa</a>
+            <a href="{% url 'shop:home' %}" class="back-home-link">{% t "bosh_sahifa" %}</a>
         {% endif %}
         {% block content %}{% endblock %}
     </main>
 
     <footer class="site-footer">
         <div class="container">
-            <p>&copy; {% now "Y" %} OnlyGirls — Phone case do'koni. Barcha huquqlar himoyalangan.</p>
+            <p>&copy; {% now "Y" %} {% t "footer_text" %}</p>
         </div>
     </footer>
 

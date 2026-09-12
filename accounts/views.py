@@ -1,10 +1,31 @@
+import random
+import re
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 from django.shortcuts import redirect, render
 
 from .forms import LoginForm, RegisterForm
 from .models import Profile
+
+
+def _send_verification_code(profile):
+    profile.verification_code = f"{random.randint(0, 999999):06d}"
+    profile.save()
+    send_mail(
+        subject="Emailingizni tasdiqlang — OnlyGirls",
+        message=(
+            f"Salom!\n\nOnlyGirls'da ro'yxatdan o'tish uchun quyidagi kodni "
+            f"kiriting:\n\n{profile.verification_code}\n\n"
+            f"Agar bu so'rovni siz yubormagan bo'lsangiz, xabarni e'tiborsiz qoldiring."
+        ),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[profile.user.email],
+        fail_silently=True,
+    )
 
 
 def register(request):
@@ -19,18 +40,47 @@ def register(request):
             user.email = form.cleaned_data['email']
             user.set_password(form.cleaned_data['password'])
             user.save()
-            Profile.objects.create(
+            profile = Profile.objects.create(
                 user=user,
                 phone_number=form.cleaned_data['phone_number'],
                 photo=form.cleaned_data.get('photo'),
             )
+            _send_verification_code(profile)
             login(request, user)
-            messages.success(request, "Ro'yxatdan muvaffaqiyatli o'tdingiz!")
-            return redirect('shop:home')
+            messages.success(
+                request,
+                "Ro'yxatdan muvaffaqiyatli o'tdingiz! Gmail manzilingizga yuborilgan "
+                "kodni kiriting."
+            )
+            return redirect('accounts:verify_email')
     else:
         form = RegisterForm()
 
     return render(request, 'accounts/register.html', {'form': form})
+
+
+@login_required
+def verify_email(request):
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+
+    if profile.email_verified:
+        return redirect('accounts:profile')
+
+    if request.method == 'POST':
+        if 'resend' in request.POST:
+            _send_verification_code(profile)
+            messages.success(request, "Yangi kod gmailingizga yuborildi.")
+        else:
+            code = request.POST.get('code', '').strip()
+            if code and code == profile.verification_code:
+                profile.email_verified = True
+                profile.verification_code = ''
+                profile.save()
+                messages.success(request, "Gmail manzilingiz tasdiqlandi!")
+                return redirect('accounts:profile')
+            messages.error(request, "Kod noto'g'ri. Qaytadan urinib ko'ring.")
+
+    return render(request, 'accounts/verify_email.html')
 
 
 def user_login(request):
@@ -77,3 +127,33 @@ def profile(request):
 
     orders = request.user.orders.all()
     return render(request, 'accounts/profile.html', {'profile': user_profile, 'orders': orders})
+
+
+@login_required
+def notifications(request):
+    from orders.models import Order
+    from shop.models import Review
+
+    qs = request.user.notifications.all()
+    qs.filter(is_read=False).update(is_read=True)
+    items = list(qs)
+
+    for note in items:
+        note.reviewable_products = []
+        match = re.search(r'/success/(\d+)/', note.link)
+        if not match:
+            continue
+        order = Order.objects.filter(
+            id=int(match.group(1)), user=request.user, status=Order.STATUS_DELIVERED
+        ).first()
+        if not order:
+            continue
+        reviewed_ids = set(Review.objects.filter(
+            user=request.user, product_id__in=[i.product_id for i in order.items.all()]
+        ).values_list('product_id', flat=True))
+        note.reviewable_products = [
+            item.product for item in order.items.select_related('product').all()
+            if item.product_id not in reviewed_ids
+        ]
+
+    return render(request, 'accounts/notifications.html', {'notifications': items})

@@ -1,0 +1,20 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Emailni tasdiqlash | OnlyGirls{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Gmail manzilingizni tasdiqlang</h1>
+
+<form method="post" class="auth-form">
+    {% csrf_token %}
+    <p style="margin-top:0;">{{ request.user.email }} manziliga 6 xonali kod yuborildi. Kodni pastga kiriting.</p>
+    <label for="codeInput">Tasdiqlash kodi</label>
+    <input type="text" id="codeInput" name="code" maxlength="6" inputmode="numeric" placeholder="000000" required autofocus>
+    <button type="submit" class="btn">Tasdiqlash</button>
+</form>
+
+<form method="post" class="auth-form" style="margin-top:16px;">
+    {% csrf_token %}
+    <button type="submit" name="resend" value="1" class="filter-pill" style="width:100%; text-align:center;">Kodni qayta yuborish</button>
+</form>
+{% endblock %}

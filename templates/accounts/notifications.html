@@ -1,0 +1,48 @@
+{% extends 'shop/base.html' %}
+{% load shop_extras %}
+
+{% block title %}{% t "bildirishnomalar" %} | OnlyGirls{% endblock %}
+
+{% block content %}
+<h1 class="page-title">{% t "bildirishnomalar" %}</h1>
+
+<div class="orders-list">
+    {% for note in notifications %}
+        <div class="order-item{% if not note.is_read %} order-item-unread{% endif %}">
+            {% if note.link %}<a href="{{ note.link }}">{{ note.message }}</a>{% else %}{{ note.message }}{% endif %}
+            <p class="review-date">{{ note.created_at|date:"d.m.Y H:i" }}</p>
+
+            {% if note.reviewable_products %}
+            <button type="button" class="btn review-open-btn" onclick="document.getElementById('reviewModal-{{ forloop.counter }}').hidden=false">{% t "izoh_qoldiring_tugma" %}</button>
+
+            <div class="modal-overlay" id="reviewModal-{{ forloop.counter }}" hidden>
+                <div class="modal-box">
+                    <button type="button" class="modal-close" onclick="document.getElementById('reviewModal-{{ forloop.counter }}').hidden=true" aria-label="Yopish">✕</button>
+                    <h3 class="modal-title">Mahsulotlarga izoh qoldiring</h3>
+
+                    {% for product in note.reviewable_products %}
+                    <div class="modal-review-item">
+                        <p class="modal-product-name">{{ product.name }}</p>
+                        <form method="post" action="{% url 'shop:submit_review' product.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{% url 'accounts:notifications' %}">
+                            <div class="star-input">
+                                {% for i in "54321" %}
+                                <input type="radio" id="star{{ i }}-{{ product.id }}" name="rating" value="{{ i }}" required>
+                                <label for="star{{ i }}-{{ product.id }}">★</label>
+                                {% endfor %}
+                            </div>
+                            <textarea name="comment" rows="3" placeholder="Mahsulot haqida fikringiz..." required></textarea>
+                            <button type="submit" class="btn">Yuborish</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    {% empty %}
+        <p class="empty-message">{% t "hozircha_bildirishnoma_yoq" %}</p>
+    {% endfor %}
+</div>
+{% endblock %}

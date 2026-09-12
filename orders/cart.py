@@ -32,6 +32,16 @@ class Cart:
             del self.cart[product_id]
             self.save()
 
+    def set_quantity(self, product, quantity):
+        product_id = str(product.id)
+        if product_id not in self.cart:
+            return
+        if quantity <= 0:
+            del self.cart[product_id]
+        else:
+            self.cart[product_id]['quantity'] = min(quantity, 20)
+        self.save()
+
     def save(self):
         self.session.modified = True
 

@@ -1,0 +1,64 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Buyurtmalarni boshqarish | OnlyGirls{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Buyurtmalarni boshqarish</h1>
+
+<div class="dashboard-tabs">
+    <a href="{% url 'shop:dashboard_products' %}" class="dashboard-tab">Mahsulotlar</a>
+    <a href="{% url 'orders:dashboard_orders' %}" class="dashboard-tab active">Buyurtmalar</a>
+</div>
+
+{% for status_key, label, section_orders in sections %}
+<section class="dashboard-order-section">
+    <h2 class="dashboard-section-title status-{{ status_key }}">{{ label }} <span class="dashboard-count">({{ section_orders|length }})</span></h2>
+
+    {% if section_orders %}
+    <div class="dashboard-table-wrap">
+        <table class="dashboard-table">
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Mijoz</th>
+                    <th>Telefon</th>
+                    <th>Mahsulotlar</th>
+                    <th>Jami</th>
+                    <th>Sana</th>
+                    <th>Holatni o'zgartirish</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in section_orders %}
+                <tr>
+                    <td>#{{ order.id }}</td>
+                    <td>{{ order.full_name }}</td>
+                    <td>{{ order.phone_number }}</td>
+                    <td>
+                        {% for item in order.items.all %}
+                            {{ item.product.name }} ({{ item.phone_model|default:item.product.phone_model }}) x{{ item.quantity }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>{{ order.get_total_cost }} so'm</td>
+                    <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                    <td>
+                        <form method="post" action="{% url 'orders:dashboard_update_status' order.id %}" class="dashboard-status-form">
+                            {% csrf_token %}
+                            <select name="status" onchange="this.form.submit()">
+                                {% for value, text in status_choices %}
+                                <option value="{{ value }}" {% if value == order.status %}selected{% endif %}>{{ text }}</option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty-message">Bu holatda buyurtma yo'q.</p>
+    {% endif %}
+</section>
+{% endfor %}
+{% endblock %}

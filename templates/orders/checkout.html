@@ -1,20 +1,21 @@
 {% extends 'shop/base.html' %}
+{% load shop_extras %}
 
-{% block title %}Buyurtma berish | OnlyGirls{% endblock %}
+{% block title %}{% t "buyurtma_berish" %} | OnlyGirls{% endblock %}
 
 {% block content %}
-<h1 class="page-title">Buyurtmani rasmiylashtirish</h1>
+<h1 class="page-title">{% t "buyurtmani_rasmiylashtirish" %}</h1>
 
-<p class="cart-total" style="text-align:center;">Jami: {{ cart.get_total_price }} so'm</p>
+<p class="cart-total" style="text-align:center;">{% t "jami" %}: {{ cart.get_total_price }} so'm</p>
 
 <form method="post" class="checkout-form">
     {% csrf_token %}
-    <label for="phone_number">Telefon raqamingiz</label>
-    <input type="text" name="phone_number" id="phone_number" placeholder="+998 90 123 45 67" required>
+    <label for="phone_number">{% t "telefon_raqamingiz" %}</label>
+    <input type="text" name="phone_number" id="phone_number" placeholder="+998901234567" pattern="\+998\d{9}" value="{{ phone_number|default:'' }}" required>
 
-    <label for="address">Manzilingiz</label>
-    <textarea name="address" id="address" rows="3" placeholder="Yetkazib berish manzili"></textarea>
+    <label for="address">{% t "manzilingiz" %}</label>
+    <textarea name="address" id="address" rows="3">{{ address|default:'' }}</textarea>
 
-    <button type="submit" class="btn">Buyurtmani tasdiqlash</button>
+    <button type="submit" class="btn">{% t "buyurtmani_tasdiqlash" %}</button>
 </form>
 {% endblock %}

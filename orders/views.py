@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
 
+from accounts.decorators import staff_required
+from accounts.validators import is_valid_uz_phone
 from shop.models import Product
 from .cart import Cart
 from .models import Order, OrderItem
@@ -38,6 +40,19 @@ def cart_remove(request, product_id):
     return redirect('orders:cart_detail')
 
 
+def cart_update(request, product_id):
+    cart = Cart(request)
+    product = get_object_or_404(Product, id=product_id)
+    if request.method == 'POST':
+        try:
+            delta = int(request.POST.get('delta', 0))
+        except (TypeError, ValueError):
+            delta = 0
+        current = cart.cart.get(str(product.id), {}).get('quantity', 0)
+        cart.set_quantity(product, current + delta)
+    return redirect('orders:cart_detail')
+
+
 def cart_detail(request):
     cart = Cart(request)
     return render(request, 'orders/cart_detail.html', {'cart': cart})
@@ -53,6 +68,13 @@ def checkout(request):
     if request.method == 'POST':
         phone_number = request.POST.get('phone_number', '').strip()
         address = request.POST.get('address', '').strip()
+
+        if not is_valid_uz_phone(phone_number):
+            messages.error(
+                request,
+                "Telefon raqami +998XXXXXXXXX ko'rinishida bo'lishi kerak (masalan: +998901234567)."
+            )
+            return render(request, 'orders/checkout.html', {'cart': cart, 'phone_number': phone_number, 'address': address})
 
         order = Order.objects.create(
             user=request.user,
@@ -86,6 +108,7 @@ def checkout(request):
             recipient_list=[settings.ORDER_NOTIFICATION_EMAIL],
             fail_silently=True,
         )
+        order.notify_admins_new_order()
 
         cart.clear()
         messages.success(request, "Buyurtmangiz qabul qilindi! Tez orada siz bilan bog'lanamiz.")
@@ -98,3 +121,29 @@ def checkout(request):
 def order_success(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
     return render(request, 'orders/order_success.html', {'order': order})
+
+
+@staff_required
+def dashboard_orders(request):
+    orders = Order.objects.select_related('user').prefetch_related('items__product')
+    sections = [
+        (status_key, label, orders.filter(status=status_key))
+        for status_key, label in Order.STATUS_CHOICES
+    ]
+    return render(request, 'orders/dashboard_orders.html', {
+        'sections': sections,
+        'status_choices': Order.STATUS_CHOICES,
+    })
+
+
+@staff_required
+def dashboard_update_status(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in dict(Order.STATUS_CHOICES) and new_status != order.status:
+            order.status = new_status
+            order.save()
+            order.notify_status_change()
+            messages.success(request, f"Buyurtma #{order.id} holati “{order.get_status_display()}” ga o'zgartirildi.")
+    return redirect('orders:dashboard_orders')

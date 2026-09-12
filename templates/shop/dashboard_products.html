@@ -1,0 +1,48 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Mahsulotlarni boshqarish | OnlyGirls{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1 class="page-title">Mahsulotlarni boshqarish</h1>
+    <a href="{% url 'shop:dashboard_product_add' %}" class="btn">+ Yangi mahsulot</a>
+</div>
+
+<div class="dashboard-tabs">
+    <a href="{% url 'shop:dashboard_products' %}" class="dashboard-tab active">Mahsulotlar</a>
+    <a href="{% url 'orders:dashboard_orders' %}" class="dashboard-tab">Buyurtmalar</a>
+</div>
+
+<div class="dashboard-table-wrap">
+    <table class="dashboard-table">
+        <thead>
+            <tr>
+                <th>Rasm</th>
+                <th>Nomi</th>
+                <th>Kategoriya</th>
+                <th>Narxi</th>
+                <th>Omborda</th>
+                <th>Sotuvda</th>
+                <th>Tanlangan</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td><img src="{{ product.image.url }}" alt="" class="dashboard-thumb"></td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.category.name }}</td>
+                <td>{{ product.price }} so'm</td>
+                <td class="{% if product.stock_quantity <= 2 %}dashboard-low-stock{% endif %}">{{ product.stock_quantity }} dona</td>
+                <td>{% if product.in_stock %}<span class="status-pill status-confirmed">Ha</span>{% else %}<span class="status-pill status-cancelled">Yo'q</span>{% endif %}</td>
+                <td>{% if product.is_featured %}✓{% endif %}</td>
+                <td><a href="{% url 'shop:dashboard_product_edit' product.pk %}" class="dashboard-edit-link">Tahrirlash</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="empty-message">Hozircha mahsulot yo'q.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

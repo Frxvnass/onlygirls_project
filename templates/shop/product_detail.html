@@ -1,4 +1,5 @@
 {% extends 'shop/base.html' %}
+{% load shop_extras %}
 
 {% block title %}{{ product.name }} | OnlyGirls{% endblock %}
 
@@ -32,7 +33,7 @@
         <div class="product-detail-info reveal">
             <p class="breadcrumb"><a href="{% url 'shop:product_list_by_category' product.category.slug %}">{{ product.category.name }}</a></p>
             <h1>{{ product.name }}</h1>
-            <p class="product-model">Mos model: {{ product.phone_model }}</p>
+            <p class="product-model">{% t "mos_model" %}: {{ product.phone_model }}</p>
             {% include 'shop/_rating.html' %}
             <p class="product-price-big">{{ product.price }} so'm</p>
             <p class="product-description">{{ product.description|linebreaks }}</p>
@@ -40,28 +41,28 @@
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ request.path }}">
 
-                <label class="field-label" for="phoneModelSelect">Telefon modelingizni tanlang</label>
+                <label class="field-label" for="phoneModelSelect">{% t "telefon_modelini_tanlang" %}</label>
                 <select name="phone_model" id="phoneModelSelect" class="phone-model-select" required>
                     {% for model in phone_models %}
                     <option value="{{ model }}" {% if model == product.phone_model %}selected{% endif %}>{{ model }}</option>
                     {% endfor %}
                 </select>
 
-                <label class="field-label">Soni</label>
+                <label class="field-label">{% t "soni" %}</label>
                 <div class="qty-stepper">
                     <button type="button" class="qty-btn" onclick="changeQty(-1)" aria-label="Kamaytirish">−</button>
                     <input type="number" name="quantity" id="qtyInput" class="qty-input" value="1" min="1" max="20" readonly>
                     <button type="button" class="qty-btn" onclick="changeQty(1)" aria-label="Ko'paytirish">+</button>
                 </div>
 
-                <button type="submit" class="btn btn-cart">Savatga qo'shish</button>
+                <button type="submit" class="btn btn-cart">{% t "savatga_qoshish" %}</button>
             </form>
         </div>
     </div>
 
     {% if related_products %}
     <aside class="product-detail-related reveal">
-        <h3 class="related-title">Sizga yoqishi mumkin</h3>
+        <h3 class="related-title">{% t "sizga_yoqishi_mumkin" %}</h3>
         <div class="related-list">
             {% for rp in related_products %}
             <a href="{{ rp.get_absolute_url }}" class="related-card">
@@ -80,7 +81,7 @@
 </div>
 
 <section class="section reviews-section">
-    <h2 class="section-title">Sharhlar</h2>
+    <h2 class="section-title">{% t "sharhlar" %}</h2>
 
     {% if reviews %}
         <div class="review-list">
@@ -92,6 +93,22 @@
                 </div>
                 <p class="review-comment">{{ review.comment }}</p>
                 <p class="review-date">{{ review.created_at|date:"d.m.Y" }}</p>
+
+                {% if review.admin_reply %}
+                <div class="review-reply">
+                    <strong>{% t "onlygirls_javobi" %}</strong>
+                    <p>{{ review.admin_reply }}</p>
+                </div>
+                {% endif %}
+
+                {% if user.is_staff %}
+                <form method="post" action="{% url 'shop:reply_to_review' review.id %}" class="review-reply-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <textarea name="admin_reply" rows="2" placeholder="Mijozga javob yozing...">{{ review.admin_reply }}</textarea>
+                    <button type="submit" class="btn btn-cart">{% if review.admin_reply %}{% t "javobni_yangilash" %}{% else %}{% t "javob_yozish" %}{% endif %}</button>
+                </form>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
@@ -103,7 +120,7 @@
         {% if can_review and not already_reviewed %}
         <form method="post" class="review-form">
             {% csrf_token %}
-            <h3>Sharh qoldiring</h3>
+            <h3>{% t "sharh_qoldiring" %}</h3>
             <div class="star-input">
                 {% for i in "54321" %}
                 <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" required>
@@ -111,7 +128,7 @@
                 {% endfor %}
             </div>
             <textarea name="comment" rows="4" placeholder="Mahsulot haqida fikringiz..." required></textarea>
-            <button type="submit" class="btn">Sharh yuborish</button>
+            <button type="submit" class="btn">{% t "sharh_yuborish" %}</button>
         </form>
         {% elif already_reviewed %}
             <p class="empty-message">Siz bu mahsulotga sharh qoldirgansiz. Rahmat!</p>

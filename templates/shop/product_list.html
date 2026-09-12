@@ -1,12 +1,13 @@
 {% extends 'shop/base.html' %}
+{% load shop_extras %}
 
-{% block title %}{% if category %}{{ category.name }}{% else %}Mahsulotlar{% endif %} | OnlyGirls{% endblock %}
+{% block title %}{% if category %}{{ category.name }}{% else %}{% t "mahsulotlar" %}{% endif %} | OnlyGirls{% endblock %}
 
 {% block content %}
-<h1 class="page-title">{% if category %}{{ category.name }}{% else %}Barcha mahsulotlar{% endif %}</h1>
+<h1 class="page-title">{% if category %}{{ category.name }}{% else %}{% t "barcha_mahsulotlar" %}{% endif %}</h1>
 
 <div class="filter-bar">
-    <a href="{% url 'shop:product_list' %}" class="filter-pill {% if not category %}active{% endif %}">Barchasi</a>
+    <a href="{% url 'shop:product_list' %}" class="filter-pill {% if not category %}active{% endif %}">{% t "barchasi" %}</a>
     {% for cat in categories %}
         <a href="{% url 'shop:product_list_by_category' cat.slug %}" class="filter-pill {% if category.slug == cat.slug %}active{% endif %}">{{ cat.name }}</a>
     {% endfor %}
@@ -19,6 +20,6 @@
     {% endfor %}
 </div>
 {% else %}
-<p class="empty-message">Bu bo'limda hozircha mahsulot yo'q.</p>
+<p class="empty-message">{% t "bu_bolimda_mahsulot_yoq" %}</p>
 {% endif %}
 {% endblock %}

@@ -1,6 +1,15 @@
 from django import template
 
+from shop.translations import translate
+
 register = template.Library()
+
+
+@register.simple_tag(takes_context=True)
+def t(context, key):
+    request = context.get('request')
+    lang = request.session.get('language', 'uz') if request else 'uz'
+    return translate(key, lang)
 
 
 @register.filter

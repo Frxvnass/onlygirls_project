@@ -2,7 +2,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Exists, OuterRef, Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
+from accounts.decorators import staff_required
+from .forms import ProductForm
 from .models import Category, Like, Product, Review
 
 IPHONE_MODELS = [
@@ -26,6 +29,15 @@ def _annotate_products(request, queryset):
         like_subquery = Like.objects.filter(user=request.user, product=OuterRef('pk'))
         queryset = queryset.annotate(is_liked=Exists(like_subquery))
     return queryset
+
+
+def set_language(request):
+    if request.method == 'POST':
+        language = request.POST.get('language')
+        if language in ('uz', 'ru'):
+            request.session['language'] = language
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or 'shop:home'
+    return redirect(next_url)
 
 
 def home(request):
@@ -116,6 +128,32 @@ def product_detail(request, slug):
 
 
 @login_required
+def submit_review(request, product_id):
+    from orders.models import OrderItem
+
+    product = get_object_or_404(Product, id=product_id)
+    next_url = request.POST.get('next') or 'accounts:notifications'
+
+    if request.method == 'POST':
+        can_review = OrderItem.objects.filter(order__user=request.user, product=product).exists()
+        already_reviewed = Review.objects.filter(product=product, user=request.user).exists()
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment', '').strip()
+
+        if not can_review:
+            messages.error(request, "Sharh yozish uchun avval shu mahsulotni sotib olishingiz kerak.")
+        elif already_reviewed:
+            messages.error(request, "Siz bu mahsulotga allaqachon sharh qoldirgansiz.")
+        elif rating and comment:
+            Review.objects.create(product=product, user=request.user, rating=int(rating), comment=comment)
+            messages.success(request, f"“{product.name}” uchun sharhingiz uchun rahmat!")
+        else:
+            messages.error(request, "Iltimos, baho va izoh kiriting.")
+
+    return redirect(next_url)
+
+
+@login_required
 def toggle_like(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     like, created = Like.objects.get_or_create(user=request.user, product=product)
@@ -147,3 +185,60 @@ def liked_products(request):
         request, Product.objects.filter(likes__user=request.user)
     )
     return render(request, 'shop/liked_products.html', {'products': products})
+
+
+@staff_required
+def dashboard_products(request):
+    products = Product.objects.select_related('category').all()
+    return render(request, 'shop/dashboard_products.html', {'products': products})
+
+
+@staff_required
+def dashboard_product_add(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Yangi mahsulot qo'shildi.")
+            return redirect('shop:dashboard_products')
+    else:
+        form = ProductForm()
+    return render(request, 'shop/dashboard_product_form.html', {'form': form, 'product': None})
+
+
+@staff_required
+def dashboard_product_edit(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Mahsulot yangilandi.")
+            return redirect('shop:dashboard_products')
+    else:
+        form = ProductForm(instance=product)
+    return render(request, 'shop/dashboard_product_form.html', {'form': form, 'product': product})
+
+
+@staff_required
+def reply_to_review(request, review_id):
+    review = get_object_or_404(Review, id=review_id)
+    if request.method == 'POST':
+        reply_text = request.POST.get('admin_reply', '').strip()
+        review.admin_reply = reply_text
+        review.admin_reply_at = timezone.now() if reply_text else None
+        review.save()
+
+        if reply_text:
+            from accounts.models import Notification
+            Notification.objects.create(
+                user=review.user,
+                message=f"“{review.product.name}” mahsulotiga yozgan sharhingizga javob berildi.",
+                link=review.product.get_absolute_url(),
+            )
+            messages.success(request, "Javobingiz yuborildi.")
+        else:
+            messages.success(request, "Javob o'chirildi.")
+
+    next_url = request.POST.get('next') or review.product.get_absolute_url()
+    return redirect(next_url)

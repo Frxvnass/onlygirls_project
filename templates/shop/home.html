@@ -1,5 +1,5 @@
 {% extends 'shop/base.html' %}
-{% load static %}
+{% load static shop_extras %}
 
 {% block content %}
 <section class="hero">
@@ -14,21 +14,24 @@
     <div class="hero-overlay" aria-hidden="true"></div>
     <div class="hero-content">
         <h1>Blossom in Every Detail</h1>
-        <p>OnlyGirls — qizlar uchun eng chiroyli va sifatli telefon g'iloflari do'koni</p>
-        <a href="{% url 'shop:product_list' %}" class="btn">Xarid qilish</a>
+        <p>{% t "hero_subtitle" %}</p>
+        <a href="{% url 'shop:product_list' %}" class="btn">{% t "xarid_qilish" %}</a>
     </div>
 </section>
 
 <section class="section">
-    <h2 class="section-title reveal">Bizning mahsulotlar</h2>
+    <h2 class="section-title reveal">{% t "bizning_mahsulotlar" %}</h2>
     {% if featured_products %}
     <div class="product-grid">
         {% for product in featured_products %}
             {% include 'shop/_product_card.html' %}
         {% endfor %}
     </div>
+    <div class="see-more-wrap">
+        <a href="{% url 'shop:product_list' %}" class="see-more-link">{% t "korproq_korish" %}</a>
+    </div>
     {% else %}
-    <p class="empty-message">Hozircha tanlangan mahsulotlar yo'q. Admin panelda mahsulot qo'shing.</p>
+    <p class="empty-message">{% t "kop_qolgan_yozuv" %}</p>
     {% endif %}
 </section>
 {% endblock %}

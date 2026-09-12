@@ -1,0 +1,20 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}{% if product %}Mahsulotni tahrirlash{% else %}Yangi mahsulot{% endif %} | OnlyGirls{% endblock %}
+
+{% block content %}
+<h1 class="page-title">{% if product %}"{{ product.name }}" ni tahrirlash{% else %}Yangi mahsulot qo'shish{% endif %}</h1>
+
+<form method="post" enctype="multipart/form-data" class="checkout-form">
+    {% csrf_token %}
+    {% for field in form %}
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<p class="field-help">{{ field.help_text }}</p>{% endif %}
+        {% if field.errors %}<div class="form-errors">{{ field.errors|striptags }}</div>{% endif %}
+    {% endfor %}
+    {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors|striptags }}</div>{% endif %}
+    <button type="submit" class="btn">Saqlash</button>
+    <a href="{% url 'shop:dashboard_products' %}" class="back-home-link">← Bekor qilish</a>
+</form>
+{% endblock %}
