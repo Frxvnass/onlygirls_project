@@ -1,0 +1,12 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Buyurtma qabul qilindi | OnlyGirls{% endblock %}
+
+{% block content %}
+<div class="checkout-form" style="text-align:center;">
+    <h1 class="page-title" style="margin-top:0;">Rahmat, {{ order.full_name }}! 🌸</h1>
+    <p>Sizning <strong>#{{ order.id }}</strong>-raqamli buyurtmangiz qabul qilindi.</p>
+    <p>Tez orada operatorlarimiz siz bilan bog'lanishadi.</p>
+    <a href="{% url 'shop:product_list' %}" class="btn">Xaridni davom ettirish</a>
+</div>
+{% endblock %}

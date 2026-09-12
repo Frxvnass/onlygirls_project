@@ -1,0 +1,46 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Savat | OnlyGirls{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Savatingiz</h1>
+
+{% if cart|length %}
+<table class="cart-table">
+    <thead>
+        <tr>
+            <th>Mahsulot</th>
+            <th>Model</th>
+            <th>Narxi</th>
+            <th>Soni</th>
+            <th>Jami</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in cart %}
+        <tr>
+            <td>
+                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                {{ item.product.name }}
+            </td>
+            <td>{{ item.phone_model|default:item.product.phone_model }}</td>
+            <td>{{ item.price }} so'm</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.total_price }} so'm</td>
+            <td><a href="{% url 'orders:cart_remove' item.product.id %}" class="remove-link">O'chirish</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p class="cart-total">Jami: {{ cart.get_total_price }} so'm</p>
+
+<div class="cart-actions">
+    <a href="{% url 'shop:product_list' %}" class="filter-pill">Xaridni davom ettirish</a>
+    <a href="{% url 'orders:checkout' %}" class="btn">Buyurtma berish</a>
+</div>
+{% else %}
+<p class="empty-message">Savatingiz bo'sh. <a href="{% url 'shop:product_list' %}">Mahsulotlarni ko'rish</a></p>
+{% endif %}
+{% endblock %}

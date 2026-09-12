@@ -1,0 +1,17 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}"{{ query }}" qidiruvi | OnlyGirls{% endblock %}
+
+{% block content %}
+<h1 class="page-title">"{{ query }}" bo'yicha qidiruv natijalari</h1>
+
+{% if products %}
+<div class="product-grid">
+    {% for product in products %}
+        {% include 'shop/_product_card.html' %}
+    {% endfor %}
+</div>
+{% else %}
+<p class="empty-message">"{{ query }}" bo'yicha hech narsa topilmadi. <a href="{% url 'shop:product_list' %}">Barcha mahsulotlarni ko'rish</a></p>
+{% endif %}
+{% endblock %}

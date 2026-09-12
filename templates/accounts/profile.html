@@ -1,0 +1,50 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Mening profilim | OnlyGirls{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Mening profilim</h1>
+
+<div class="profile-card">
+    {% if profile.photo %}
+        <img src="{{ profile.photo.url }}" alt="{{ user.get_full_name }}" class="profile-photo">
+    {% else %}
+        <img src="https://ui-avatars.com/api/?name={{ user.first_name }}+{{ user.last_name }}&background=ffd1e3&color=d6336c&size=128" alt="{{ user.get_full_name }}" class="profile-photo">
+    {% endif %}
+    <div class="profile-info">
+        <h2>{{ user.get_full_name|default:user.username }}</h2>
+        <p>📧 {{ user.email }}</p>
+        <p>📱 {{ profile.phone_number|default:"Telefon raqami kiritilmagan" }}</p>
+        <a href="{% url 'accounts:logout' %}" class="remove-link">Chiqish</a>
+    </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="profile-form">
+    {% csrf_token %}
+    <label for="first_name">Ism</label>
+    <input type="text" name="first_name" id="first_name" value="{{ user.first_name }}">
+
+    <label for="last_name">Familiya</label>
+    <input type="text" name="last_name" id="last_name" value="{{ user.last_name }}">
+
+    <label for="phone_number">Telefon raqami</label>
+    <input type="text" name="phone_number" id="phone_number" value="{{ profile.phone_number }}">
+
+    <label for="photo">Suratni yangilash</label>
+    <input type="file" name="photo" id="photo">
+
+    <button type="submit" class="btn">Saqlash</button>
+</form>
+
+<h2 class="section-title">Buyurtmalarim</h2>
+<div class="orders-list">
+    {% for order in orders %}
+        <div class="order-item">
+            <strong>Buyurtma #{{ order.id }}</strong> — {{ order.created_at|date:"d.m.Y H:i" }}
+            <p>Jami: {{ order.get_total_cost }} so'm</p>
+        </div>
+    {% empty %}
+        <p class="empty-message">Hozircha buyurtmalar yo'q.</p>
+    {% endfor %}
+</div>
+{% endblock %}

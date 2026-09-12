@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}OnlyGirls | Phone Case Shop{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700;800&family=Alex+Brush&family=Caveat:wght@600;700&family=Playfair+Display:ital,wght@1,500;1,600;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <a href="{% url 'shop:home' %}" class="logo">only<span>girls</span></a>
+
+            <button class="katalog-btn" onclick="toggleSidebar()">
+                <span class="katalog-icon">☰</span> Katalog
+            </button>
+
+            <form action="{% url 'shop:search' %}" method="get" class="search-form">
+                <input type="text" name="q" placeholder="Qidirish" value="{{ query|default:'' }}">
+                <button type="submit" class="search-btn" aria-label="Qidirish">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </button>
+            </form>
+
+            <div class="header-icons">
+                {% if user.is_authenticated %}
+                <a href="{% url 'accounts:profile' %}" class="header-icon-link">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"/></svg>
+                    <span>Profil</span>
+                </a>
+                {% else %}
+                <a href="{% url 'accounts:login' %}" class="header-icon-link">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"/></svg>
+                    <span>Kirish</span>
+                </a>
+                {% endif %}
+
+                <a href="{% url 'shop:liked_products' %}" class="header-icon-link">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7.2-4.5-9.8-9.1C.6 8.4 2 4.5 6 4.5c2.1 0 3.7 1.2 6 3.5 2.3-2.3 3.9-3.5 6-3.5 4 0 5.4 3.9 3.8 7.4C19.2 16.5 12 21 12 21z"/></svg>
+                    <span>Sevimlilar</span>
+                </a>
+
+                <a href="{% url 'orders:cart_detail' %}" class="header-icon-link">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.8h8.6a2 2 0 0 0 2-1.6L21 8H6"/></svg>
+                    <span>Savatcha</span>
+                    {% if cart|length %}<span class="header-icon-badge">{{ cart|length }}</span>{% endif %}
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <aside class="sidebar" id="sidebar">
+        <button class="sidebar-close" onclick="toggleSidebar()" aria-label="Yopish">✕</button>
+
+        <div class="sidebar-brand">only<span>girls</span></div>
+
+        <nav class="sidebar-nav">
+            <a href="{% url 'shop:product_list' %}">Barcha mahsulotlar</a>
+            <button type="button" class="sidebar-toggle" onclick="toggleCategories()">
+                Kategoriyalar <span class="toggle-arrow" id="categoriesArrow">▾</span>
+            </button>
+            <div class="sidebar-submenu" id="categoriesSubmenu">
+                {% for cat in categories %}
+                    <a href="{% url 'shop:product_list_by_category' cat.slug %}">{{ cat.name }}</a>
+                {% endfor %}
+            </div>
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'accounts:profile' %}">👤 Mening profilim</a>
+            {% else %}
+                <a href="{% url 'accounts:login' %}">👤 Kirish</a>
+            {% endif %}
+        </nav>
+    </aside>
+
+    <main class="container main-content">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message message-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% if request.path != '/' %}
+            <a href="{% url 'shop:home' %}" class="back-home-link">← Bosh sahifa</a>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; {% now "Y" %} OnlyGirls — Phone case do'koni. Barcha huquqlar himoyalangan.</p>
+        </div>
+    </footer>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('open');
+        }
+
+        function toggleCategories() {
+            document.getElementById('categoriesSubmenu').classList.toggle('open');
+            document.getElementById('categoriesArrow').classList.toggle('rotated');
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var revealObserver = new IntersectionObserver(function (entries, observer) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.reveal').forEach(function (el) {
+                revealObserver.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>

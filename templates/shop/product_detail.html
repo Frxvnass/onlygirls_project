@@ -1,0 +1,143 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}{{ product.name }} | OnlyGirls{% endblock %}
+
+{% block content %}
+<div class="product-detail">
+    <div class="product-detail-main">
+        <div class="product-detail-image">
+            <div class="product-image-stage">
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" id="mainProductImage">
+                {% if product.is_featured %}<span class="hit-badge">Xit</span>{% endif %}
+                {% if user.is_authenticated %}
+                <form action="{% url 'shop:toggle_like' product.id %}" method="post" class="like-form-detail">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <button type="submit" class="like-icon-btn {% if product.is_liked %}liked{% endif %}" aria-label="Yoqtirish">{% if product.is_liked %}♥{% else %}♡{% endif %}</button>
+                </form>
+                {% endif %}
+            </div>
+            {% if product.image2 or product.image3 %}
+            <div class="thumb-rail">
+                <img src="{{ product.image.url }}" alt="" class="thumbnail active" onclick="showProductImage(this, '{{ product.image.url }}')">
+                {% if product.image2 %}
+                <img src="{{ product.image2.url }}" alt="" class="thumbnail" onclick="showProductImage(this, '{{ product.image2.url }}')">
+                {% endif %}
+                {% if product.image3 %}
+                <img src="{{ product.image3.url }}" alt="" class="thumbnail" onclick="showProductImage(this, '{{ product.image3.url }}')">
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="product-detail-info reveal">
+            <p class="breadcrumb"><a href="{% url 'shop:product_list_by_category' product.category.slug %}">{{ product.category.name }}</a></p>
+            <h1>{{ product.name }}</h1>
+            <p class="product-model">Mos model: {{ product.phone_model }}</p>
+            {% include 'shop/_rating.html' %}
+            <p class="product-price-big">{{ product.price }} so'm</p>
+            <p class="product-description">{{ product.description|linebreaks }}</p>
+            <form action="{% url 'orders:cart_add' product.id %}" method="post" class="add-to-cart-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+
+                <label class="field-label" for="phoneModelSelect">Telefon modelingizni tanlang</label>
+                <select name="phone_model" id="phoneModelSelect" class="phone-model-select" required>
+                    {% for model in phone_models %}
+                    <option value="{{ model }}" {% if model == product.phone_model %}selected{% endif %}>{{ model }}</option>
+                    {% endfor %}
+                </select>
+
+                <label class="field-label">Soni</label>
+                <div class="qty-stepper">
+                    <button type="button" class="qty-btn" onclick="changeQty(-1)" aria-label="Kamaytirish">−</button>
+                    <input type="number" name="quantity" id="qtyInput" class="qty-input" value="1" min="1" max="20" readonly>
+                    <button type="button" class="qty-btn" onclick="changeQty(1)" aria-label="Ko'paytirish">+</button>
+                </div>
+
+                <button type="submit" class="btn btn-cart">Savatga qo'shish</button>
+            </form>
+        </div>
+    </div>
+
+    {% if related_products %}
+    <aside class="product-detail-related reveal">
+        <h3 class="related-title">Sizga yoqishi mumkin</h3>
+        <div class="related-list">
+            {% for rp in related_products %}
+            <a href="{{ rp.get_absolute_url }}" class="related-card">
+                <div class="related-card-image">
+                    <img src="{{ rp.image.url }}" alt="{{ rp.name }}">
+                </div>
+                <div class="related-card-info">
+                    <p class="related-card-name">{{ rp.name }}</p>
+                    <p class="related-card-price">{{ rp.price }} so'm</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </aside>
+    {% endif %}
+</div>
+
+<section class="section reviews-section">
+    <h2 class="section-title">Sharhlar</h2>
+
+    {% if reviews %}
+        <div class="review-list">
+            {% for review in reviews %}
+            <div class="review-card reveal">
+                <div class="review-header">
+                    <strong>{{ review.user.get_full_name|default:review.user.email }}</strong>
+                    <span class="review-stars">{% for i in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}</span>
+                </div>
+                <p class="review-comment">{{ review.comment }}</p>
+                <p class="review-date">{{ review.created_at|date:"d.m.Y" }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-message">Bu mahsulotga hali sharh yozilmagan.</p>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        {% if can_review and not already_reviewed %}
+        <form method="post" class="review-form">
+            {% csrf_token %}
+            <h3>Sharh qoldiring</h3>
+            <div class="star-input">
+                {% for i in "54321" %}
+                <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" required>
+                <label for="star{{ i }}">★</label>
+                {% endfor %}
+            </div>
+            <textarea name="comment" rows="4" placeholder="Mahsulot haqida fikringiz..." required></textarea>
+            <button type="submit" class="btn">Sharh yuborish</button>
+        </form>
+        {% elif already_reviewed %}
+            <p class="empty-message">Siz bu mahsulotga sharh qoldirgansiz. Rahmat!</p>
+        {% else %}
+            <p class="empty-message">Sharh yozish uchun avval shu mahsulotni sotib oling.</p>
+        {% endif %}
+    {% else %}
+        <p class="empty-message"><a href="{% url 'accounts:login' %}">Tizimga kiring</a>, mahsulotni sotib oling va sharh qoldiring.</p>
+    {% endif %}
+</section>
+
+<script>
+    function showProductImage(thumb, url) {
+        document.getElementById('mainProductImage').src = url;
+        document.querySelectorAll('.thumbnail').forEach(function (el) {
+            el.classList.remove('active');
+        });
+        thumb.classList.add('active');
+    }
+
+    function changeQty(delta) {
+        var input = document.getElementById('qtyInput');
+        var next = parseInt(input.value, 10) + delta;
+        var min = parseInt(input.min, 10);
+        var max = parseInt(input.max, 10);
+        input.value = Math.min(max, Math.max(min, next));
+    }
+</script>
+{% endblock %}

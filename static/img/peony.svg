@@ -1,0 +1,46 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="petalGrad" cx="50%" cy="25%" r="85%">
+      <stop offset="0%" stop-color="#fdb2c9"/>
+      <stop offset="100%" stop-color="#fc80a5"/>
+    </radialGradient>
+    <radialGradient id="petalGradInner" cx="50%" cy="25%" r="85%">
+      <stop offset="0%" stop-color="#fc80a5"/>
+      <stop offset="100%" stop-color="#b05973"/>
+    </radialGradient>
+  </defs>
+
+  <g transform="translate(100,100)">
+    <g fill="url(#petalGrad)" opacity="0.92">
+      <ellipse cx="0" cy="-46" rx="27" ry="40" transform="rotate(0)"/>
+      <ellipse cx="0" cy="-46" rx="27" ry="40" transform="rotate(45)"/>
+      <ellipse cx="0" cy="-46" rx="27" ry="40" transform="rotate(90)"/>
+      <ellipse cx="0" cy="-46" rx="27" ry="40" transform="rotate(135)"/>
+      <ellipse cx="0" cy="-46" rx="27" ry="40" transform="rotate(180)"/>
+      <ellipse cx="0" cy="-46" rx="27" ry="40" transform="rotate(225)"/>
+      <ellipse cx="0" cy="-46" rx="27" ry="40" transform="rotate(270)"/>
+      <ellipse cx="0" cy="-46" rx="27" ry="40" transform="rotate(315)"/>
+    </g>
+
+    <g fill="url(#petalGradInner)" opacity="0.95">
+      <ellipse cx="0" cy="-30" rx="18" ry="27" transform="rotate(22.5)"/>
+      <ellipse cx="0" cy="-30" rx="18" ry="27" transform="rotate(67.5)"/>
+      <ellipse cx="0" cy="-30" rx="18" ry="27" transform="rotate(112.5)"/>
+      <ellipse cx="0" cy="-30" rx="18" ry="27" transform="rotate(157.5)"/>
+      <ellipse cx="0" cy="-30" rx="18" ry="27" transform="rotate(202.5)"/>
+      <ellipse cx="0" cy="-30" rx="18" ry="27" transform="rotate(247.5)"/>
+      <ellipse cx="0" cy="-30" rx="18" ry="27" transform="rotate(292.5)"/>
+      <ellipse cx="0" cy="-30" rx="18" ry="27" transform="rotate(337.5)"/>
+    </g>
+
+    <circle r="15" fill="#fdb2c9"/>
+    <g fill="#b05973">
+      <circle cx="0" cy="-6" r="3.2"/>
+      <circle cx="5" cy="-2" r="3.2"/>
+      <circle cx="5" cy="4" r="3.2"/>
+      <circle cx="0" cy="6" r="3.2"/>
+      <circle cx="-5" cy="4" r="3.2"/>
+      <circle cx="-5" cy="-2" r="3.2"/>
+    </g>
+  </g>
+</svg>

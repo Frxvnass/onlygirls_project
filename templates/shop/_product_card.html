@@ -1,0 +1,23 @@
+<div class="product-card reveal">
+    <a href="{{ product.get_absolute_url }}" class="product-card-link">
+        <div class="product-image">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image-main">
+            {% if product.image2 %}
+                <img src="{{ product.image2.url }}" alt="{{ product.name }}" class="product-image-alt">
+            {% endif %}
+        </div>
+        <div class="product-info">
+            <h3>{{ product.name }}</h3>
+            <p class="product-model">{{ product.phone_model }}</p>
+            {% include 'shop/_rating.html' %}
+            <p class="product-price">{{ product.price }} so'm</p>
+        </div>
+    </a>
+    {% if user.is_authenticated %}
+    <form action="{% url 'shop:toggle_like' product.id %}" method="post" class="like-form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button type="submit" class="like-btn {% if product.is_liked %}liked{% endif %}" aria-label="Yoqtirish">♥</button>
+    </form>
+    {% endif %}
+</div>

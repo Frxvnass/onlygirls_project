@@ -1,0 +1,17 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Sevimli chexollarim | OnlyGirls{% endblock %}
+
+{% block content %}
+<h1 class="page-title">❤ Sevimli chexollarim</h1>
+
+{% if products %}
+<div class="product-grid">
+    {% for product in products %}
+        {% include 'shop/_product_card.html' %}
+    {% endfor %}
+</div>
+{% else %}
+<p class="empty-message">Hali hech qanday chexolni yoqtirmagansiz. <a href="{% url 'shop:product_list' %}">Mahsulotlarni ko'rish</a></p>
+{% endif %}
+{% endblock %}
