@@ -17,4 +17,6 @@ def get_password_strength_errors(password):
         errors.append("Parolda kamida 1 ta kichik harf bo'lishi kerak.")
     if not re.search(r'\d', password):
         errors.append("Parolda kamida 1 ta raqam bo'lishi kerak.")
+    if not re.search(r'[^A-Za-z0-9]', password):
+        errors.append("Parolda kamida 1 ta maxsus belgi (masalan: !@#$%) bo'lishi kerak.")
     return errors
