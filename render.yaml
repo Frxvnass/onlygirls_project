@@ -42,6 +42,17 @@ services:
         sync: false
       - key: EMAIL_HOST_PASSWORD
         sync: false
-      # cloudinary://api_key:api_secret@cloud_name
-      - key: CLOUDINARY_URL
+      # Media fayllar uchun S3-uyg'un saqlash (Supabase / B2 / R2 / AWS S3).
+      # Bo'sh qoldirilsa rasmlar hosting diskida saqlanadi va deploy'da o'chadi.
+      - key: AWS_STORAGE_BUCKET_NAME
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_S3_ENDPOINT_URL
+        sync: false
+      - key: AWS_S3_REGION_NAME
+        sync: false
+      - key: AWS_S3_CUSTOM_DOMAIN
         sync: false

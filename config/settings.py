@@ -168,19 +168,30 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Hosting diskida yuklangan rasmlar har deploy'da o'chib ketadi, shuning uchun
-# CLOUDINARY_URL berilgan bo'lsa media fayllar Cloudinary'da saqlanadi.
-USE_CLOUDINARY = bool(os.environ.get('CLOUDINARY_URL'))
+# Hosting diskida yuklangan rasmlar har deploy'da o'chib ketadi. Bucket
+# sozlamalari berilgan bo'lsa media fayllar S3-uyg'un xizmatda saqlanadi
+# (Supabase Storage, Backblaze B2, Cloudflare R2, AWS S3 — bari mos keladi).
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
 
-if USE_CLOUDINARY:
-    INSTALLED_APPS += ['cloudinary_storage', 'cloudinary']
-    DEFAULT_FILE_STORAGE_BACKEND = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+if AWS_STORAGE_BUCKET_NAME:
+    AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
+    AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
+    AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL') or None
+    AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME') or None
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_QUERYSTRING_AUTH = False
+    # AWS'dan boshqa xizmatlar bucket nomini yo'lda kutadi, subdomenda emas.
+    AWS_S3_ADDRESSING_STYLE = 'path' if AWS_S3_ENDPOINT_URL else 'virtual'
+    # Ochiq fayllar boshqa manzildan tarqatilsa (masalan Supabase'da
+    # .../object/public/<bucket>), o'sha manzil shu yerda beriladi.
+    AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN') or None
+    MEDIA_STORAGE_BACKEND = 'storages.backends.s3.S3Storage'
 else:
-    DEFAULT_FILE_STORAGE_BACKEND = 'django.core.files.storage.FileSystemStorage'
+    MEDIA_STORAGE_BACKEND = 'django.core.files.storage.FileSystemStorage'
 
 STORAGES = {
     'default': {
-        'BACKEND': DEFAULT_FILE_STORAGE_BACKEND,
+        'BACKEND': MEDIA_STORAGE_BACKEND,
     },
     'staticfiles': {
         'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
