@@ -17,6 +17,15 @@
     box-sizing: border-box;
 }
 
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
 body {
     margin: 0;
     font-family: 'Quicksand', 'Segoe UI', Tahoma, sans-serif;
@@ -938,14 +947,18 @@ a {
         order: 1;
     }
 
-    .header-icons {
+    .lang-switcher {
         order: 2;
+    }
+
+    .header-icons {
+        order: 3;
         margin-left: auto;
         gap: 14px;
     }
 
     .katalog-btn {
-        order: 3;
+        order: 4;
         padding: 10px 14px;
         font-size: 0;
         gap: 0;
@@ -956,7 +969,7 @@ a {
     }
 
     .search-form {
-        order: 4;
+        order: 5;
         flex-basis: 100%;
     }
 }
