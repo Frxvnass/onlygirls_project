@@ -34,6 +34,11 @@ TRANSLATIONS = {
     'savatga_qoshish': {'uz': "Savatga qo'shish", 'ru': 'Добавить в корзину'},
     'sevimlilarga_qoshish': {'uz': "♡ Sevimlilarga qo'shish", 'ru': '♡ Добавить в избранное'},
     'sevimlilardan_olib_tashlash': {'uz': "♥ Sevimlilardan olib tashlash", 'ru': '♥ Убрать из избранного'},
+    'sevimli_chexollarim': {'uz': '❤ Sevimli chexollarim', 'ru': '❤ Избранные чехлы'},
+    'sevimli_bosh': {
+        'uz': "Hali hech qanday chexolni yoqtirmagansiz.",
+        'ru': 'Вы пока не добавили ни одного чехла в избранное.',
+    },
     'mos_model': {'uz': 'Mos model', 'ru': 'Подходящая модель'},
     'baholanmagan': {'uz': 'Baholanmagan', 'ru': 'Нет оценок'},
     'telefon_modelini_tanlang': {'uz': 'Telefon modelingizni tanlang', 'ru': 'Выберите модель телефона'},

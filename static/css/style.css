@@ -530,6 +530,11 @@ a {
     overflow: hidden;
     box-shadow: 0 4px 14px rgba(214, 51, 108, 0.12);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* auto-fit ustunlari yagona (yoki oz sonli) mahsulot bo'lganda butun
+       qatorni egallab, rasmni haddan tashqari kattalashtirib yubormasin. */
+    max-width: 320px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .product-card:hover {

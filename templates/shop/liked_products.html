@@ -1,9 +1,10 @@
 {% extends 'shop/base.html' %}
+{% load shop_extras %}
 
-{% block title %}Sevimli chexollarim | OnlyGirls{% endblock %}
+{% block title %}{% t "sevimli_chexollarim" %} | OnlyGirls{% endblock %}
 
 {% block content %}
-<h1 class="page-title">❤ Sevimli chexollarim</h1>
+<h1 class="page-title">{% t "sevimli_chexollarim" %}</h1>
 
 {% if products %}
 <div class="product-grid">
@@ -12,6 +13,6 @@
     {% endfor %}
 </div>
 {% else %}
-<p class="empty-message">Hali hech qanday chexolni yoqtirmagansiz. <a href="{% url 'shop:product_list' %}">Mahsulotlarni ko'rish</a></p>
+<p class="empty-message">{% t "sevimli_bosh" %} <a href="{% url 'shop:product_list' %}">{% t "barcha_mahsulotlar" %}</a></p>
 {% endif %}
 {% endblock %}
