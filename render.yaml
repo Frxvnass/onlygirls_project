@@ -42,3 +42,6 @@ services:
         sync: false
       - key: EMAIL_HOST_PASSWORD
         sync: false
+      # cloudinary://api_key:api_secret@cloud_name
+      - key: CLOUDINARY_URL
+        sync: false
