@@ -67,7 +67,16 @@ def verify_email(request):
         return redirect('accounts:profile')
 
     if request.method == 'POST':
-        if 'resend' in request.POST:
+        if 'cancel' in request.POST:
+            user = request.user
+            logout(request)
+            user.delete()
+            messages.info(
+                request,
+                "Ro'yxatdan o'tish bekor qilindi. Gmail manzilingizni tekshirib qaytadan urinib ko'ring."
+            )
+            return redirect('accounts:register')
+        elif 'resend' in request.POST:
             _send_verification_code(profile)
             messages.success(request, "Yangi kod gmailingizga yuborildi.")
         else:

@@ -17,4 +17,9 @@
     {% csrf_token %}
     <button type="submit" name="resend" value="1" class="filter-pill" style="width:100%; text-align:center;">Kodni qayta yuborish</button>
 </form>
+
+<form method="post" class="auth-form" style="margin-top:16px;" onsubmit="return confirm('Ro\'yxatdan o\'tish bekor qilinsin va gmail manzilini o\'zgartirib qaytadan urinib ko\'rasizmi?');">
+    {% csrf_token %}
+    <button type="submit" name="cancel" value="1" class="filter-pill" style="width:100%; text-align:center;">← Orqaga (gmailni o'zgartirish)</button>
+</form>
 {% endblock %}
