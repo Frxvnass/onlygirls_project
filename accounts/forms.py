@@ -12,7 +12,6 @@ class RegisterForm(forms.ModelForm):
         max_length=20, label="Telefon raqami",
         widget=forms.TextInput(attrs={'placeholder': '+998901234567'}),
     )
-    photo = forms.ImageField(required=False, label="Suratingiz")
 
     class Meta:
         model = User

@@ -33,7 +33,7 @@ def register(request):
         return redirect('shop:home')
 
     if request.method == 'POST':
-        form = RegisterForm(request.POST, request.FILES)
+        form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             user.username = form.cleaned_data['email']
@@ -43,7 +43,6 @@ def register(request):
             profile = Profile.objects.create(
                 user=user,
                 phone_number=form.cleaned_data['phone_number'],
-                photo=form.cleaned_data.get('photo'),
             )
             _send_verification_code(profile)
             login(request, user)
