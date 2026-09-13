@@ -9,9 +9,10 @@ services:
     name: onlygirls
     runtime: python
     plan: free
-    # createsuperuser bepul tarifda shell yo'qligi uchun shu yerda ishlaydi;
-    # admin allaqachon mavjud bo'lsa xato bermasin deb "|| true" qo'yilgan.
-    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate && (python manage.py createsuperuser --noinput || true)"
+    # ensure_admin bepul tarifda shell yo'qligi uchun shu yerda ishlaydi:
+    # DJANGO_SUPERUSER_* o'zgaruvchilarini o'zgartirib qayta deploy qilsangiz,
+    # admin login/paroli ham yangilanadi.
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate && python manage.py ensure_admin"
     startCommand: "gunicorn config.wsgi:application"
     envVars:
       - key: DATABASE_URL
