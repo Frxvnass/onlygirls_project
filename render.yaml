@@ -9,7 +9,9 @@ services:
     name: onlygirls
     runtime: python
     plan: free
-    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate"
+    # createsuperuser bepul tarifda shell yo'qligi uchun shu yerda ishlaydi;
+    # admin allaqachon mavjud bo'lsa xato bermasin deb "|| true" qo'yilgan.
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --no-input && python manage.py migrate && (python manage.py createsuperuser --noinput || true)"
     startCommand: "gunicorn config.wsgi:application"
     envVars:
       - key: DATABASE_URL
@@ -28,3 +30,14 @@ services:
         value: "3.13.4"
       - key: WEB_CONCURRENCY
         value: "2"
+      # Quyidagilarni Render panelida o'zingiz to'ldirasiz.
+      - key: DJANGO_SUPERUSER_USERNAME
+        sync: false
+      - key: DJANGO_SUPERUSER_EMAIL
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
